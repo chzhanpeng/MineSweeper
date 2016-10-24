@@ -1,11 +1,11 @@
 // Use random to generate mines
 import java.util.Random;
+// Scanner to read player's inputs
+import java.util.Scanner;
 
-import java.util.ArrayList;
 public class MineSweeper{
-
 	
-	// Class for each tile of game
+	// Tile objects to place on the board
 	public static class Tile{
 		
 		// True for tile with mine, false for no mine
@@ -16,8 +16,9 @@ public class MineSweeper{
 		public boolean visible;
 		// Tile can be flagged as a mine
 		public boolean flag;
-		// Consstructor
 		
+		// Tile class constructor, initialize mine field,
+		// New tiles are always hidden with no flag
 		public Tile(boolean mine)
 		{
 			this.mine = mine;
@@ -42,16 +43,20 @@ public class MineSweeper{
 	}
 
 	
-    // Game board consists a matrix of integers,
-	// -1 for cells with a mine,
-    // 0-8 for number of mines in surrouning cell
+	// Each tile has the following fields:
+	// 'mine': boolean whether the tile a mine
+	// 'visble': whether the tile has been revealed
+	// 'numSurroundingMines': number of mine in surrounding tile, min0-max8
+	// Game board consists a matrix of tile object as mines,
     private Tile[][] board;
 	// Difficulty of the game
 	private String difficulty;
-	// Number of mines
-	//private int numMines;
+	// Total number of mine of a game
+	private int numMines;
+	// Whether the game is over
+	private boolean gameOver;
 	
-	// Constructor, initialize everything
+	// Constructor, initialize fields and generate mines
 	public MineSweeper(int width, int height, String difficulty)
 	{
 		this.board = new Tile[width][height];
@@ -72,6 +77,7 @@ public class MineSweeper{
 			}
 		}
 		this.difficulty = difficulty;
+	
 		this.countMines();
 	}
 	
@@ -111,32 +117,42 @@ public class MineSweeper{
 		}
 	}
 
-	// Check if a tile is mine, if it's not mine
-	// Reveal a cell, make tile visibble
-	public boolean reveal(int r, int c)
+	// Reveal a tile that player choose
+	// First check if the tile is a mine, if so, set gameOver to true
+	// Print board each time a tile is revealed safely
+	public void reveal(int r, int c)
 	{
 		if(this.board[r][c].mine == true)
 		{
+			this.gameOver = true;
 			this.board[r][c].visible = true;
-			return false;
+
 		}
 		else
 		{
 			this.board[r][c].visible = true;
-			return true;
+			// Need to also reveal adjacent no-mine-surrounding tiles
 		}
 	}
 	
+	// Check if player lost a game
+	public boolean gameIsOver()
+	{
+		return this.gameOver;
+	}
+	
+	
 	// String representation of game board for player
 	// '?' for a unrevealed tile
-	// 'X' for a revealed tile with mine
+	// '*' for a revealed tile with mine
 	// ' ' for a revealed empty tile
 	// '1-8' represen number of mines in surrounding tiles
 	public String toString()
 	{
-        String repr = "";
+        String repr = "" + new String(new char[this.board[0].length*2 +3]).replace("\0","-") + "\n";
         for(int r = 0; r < this.board.length; r++)
 		{
+			repr += "| ";
 			for(int c = 0; c < this.board[0].length; c++)
 			{
 				if(this.board[r][c].visible == false)
@@ -147,7 +163,7 @@ public class MineSweeper{
 				{
 					if(this.board[r][c].mine == true)
 					{
-						repr += "X ";
+						repr += "* ";
 					}
 					else
 					{
@@ -162,8 +178,9 @@ public class MineSweeper{
 					}
 				}
 			}
-			repr += "\n";
+			repr += "|\n";
 		}
+		repr += new String(new char[this.board[0].length*2 +3]).replace("\0","-");
 		return repr;
     }
 	
@@ -177,13 +194,33 @@ public class MineSweeper{
 				this.reveal(r,c);
 			}
 		}
+		System.out.println(this);
 	}
 	
 	public static void main(String[] args)
 	{
-		MineSweeper game = new MineSweeper(10,10,"easy");
+		Scanner sc = new Scanner(System.in); // Read inputs
+		int gameWidth, gameHeight;
+		// Ask player for game size
+		System.out.print("Enter game size (n m): ");
+		gameWidth = sc.nextInt();
+		gameHeight = sc.nextInt();
+		// Ask player for game difficulty
+		System.out.print("Enter game difficulty (easy/medium/hard): ");
+		String gameDifficulty = sc.next();
+		// Create new game accordingly
+		MineSweeper game = new MineSweeper(gameWidth, gameHeight, gameDifficulty);
 		System.out.println(game);
+		// Keep asking player for next move until game is over
+		while(!game.gameIsOver())
+		{
+			System.out.print("Next move (r c): ");
+			game.reveal(sc.nextInt(), sc.nextInt());
+			System.out.println(game);
+		}
+		// Reveal all tile if game is over
 		game.revealAll();
-		System.out.println(game);
+		System.out.println("Game Over! :(");
+		
 	}
 }
