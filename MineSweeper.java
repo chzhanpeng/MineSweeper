@@ -53,6 +53,8 @@ public class MineSweeper{
 	private String difficulty;
 	// Total number of mine of a game
 	private int numMines;
+	// Total visible tiles
+	private int numVisible;
 	// Whether the game is over
 	private boolean gameOver;
 	
@@ -60,6 +62,8 @@ public class MineSweeper{
 	public MineSweeper(int width, int height, String difficulty)
 	{
 		this.board = new Tile[width][height];
+		this.numMines = 0;
+		this.numVisible = 0;
 		Random random = new Random();
 		// Randomly generate mines on the board
 		for(int r = 0; r < this.board.length; r++)
@@ -68,6 +72,7 @@ public class MineSweeper{
 			{
 				if(random.nextInt(4) == 1)
 				{
+					this.numMines++;
 					this.board[r][c] = new Tile(true);
 				}
 				else
@@ -77,7 +82,6 @@ public class MineSweeper{
 			}
 		}
 		this.difficulty = difficulty;
-	
 		this.countMines();
 	}
 	
@@ -97,21 +101,21 @@ public class MineSweeper{
 				if(this.board[r][c].mine == true)
 				{
 					try{ this.board[r-1][c-1].surroundingMines++; }
-					catch(IndexOutOfBoundsException e){};  // Upper left cell
+					catch(IndexOutOfBoundsException e){}; // Up left
 					try{ this.board[r-1][c].surroundingMines++;   }
-					catch(IndexOutOfBoundsException e){};  // Upper cell
+					catch(IndexOutOfBoundsException e){}; // Up
 					try{ this.board[r-1][c+1].surroundingMines++; }
-					catch(IndexOutOfBoundsException e){};  // Upper right cell
+					catch(IndexOutOfBoundsException e){}; // Up right
 					try{ this.board[r][c-1].surroundingMines++;   }
-					catch(IndexOutOfBoundsException e){};  // Left cell
+					catch(IndexOutOfBoundsException e){}; // Left
 					try{ this.board[r][c+1].surroundingMines++;   }
-					catch(IndexOutOfBoundsException e){};  // Right cell
+					catch(IndexOutOfBoundsException e){}; // Right
 					try{ this.board[r+1][c-1].surroundingMines++; }
-					catch(IndexOutOfBoundsException e){};  // Lower left cell
+					catch(IndexOutOfBoundsException e){}; // Down left
 					try{ this.board[r+1][c].surroundingMines++;   }
-					catch(IndexOutOfBoundsException e){};  // Lower cell
+					catch(IndexOutOfBoundsException e){}; // Down
 					try{ this.board[r+1][c+1].surroundingMines++; }
-					catch(IndexOutOfBoundsException e){};  // Lower right cell
+					catch(IndexOutOfBoundsException e){}; // Down right
 				}
 			}
 		}
@@ -119,6 +123,7 @@ public class MineSweeper{
 
 	// Reveal a tile that player choose
 	// First check if the tile is a mine, if so, set gameOver to true
+	// If a tile is blank tile, reveal its neighbors
 	// Print board each time a tile is revealed safely
 	public void reveal(int r, int c)
 	{
@@ -126,13 +131,42 @@ public class MineSweeper{
 		{
 			this.gameOver = true;
 			this.board[r][c].visible = true;
-
 		}
 		else
 		{
-			this.board[r][c].visible = true;
-			// Need to also reveal adjacent no-mine-surrounding tiles
+			if(this.board[r][c].visible == false)
+			{
+				this.numVisible++;
+				this.board[r][c].visible = true;
+				// reveal adjacent tiles when it's blank tile
+				if(this.board[r][c].surroundingMines == 0)
+				{
+					this.revealNeighbor(r,c);
+				}
+			}
 		}
+	}
+	
+	// Reveal any non-mine neighbors, recursively reveal all adjcent safe
+	// tiles, stop until adjcent tile that has more than one surrouding mine
+	private void revealNeighbor(int r, int c)
+	{
+		try{this.reveal(r-1,c-1); } // Up left
+		catch(IndexOutOfBoundsException e){};
+		try{this.reveal(r-1,c); }   // Up
+		catch(IndexOutOfBoundsException e){};
+		try{this.reveal(r-1,c+1); } // Up right
+		catch(IndexOutOfBoundsException e){};
+		try{this.reveal(r,c-1); }   // Left
+		catch(IndexOutOfBoundsException e){};
+		try{this.reveal(r,c+1); }   // Right
+		catch(IndexOutOfBoundsException e){};
+		try{this.reveal(r+1,c-1); } // Down left
+		catch(IndexOutOfBoundsException e){};
+		try{this.reveal(r+1,c); }   // Down
+		catch(IndexOutOfBoundsException e){};
+		try{this.reveal(r+1,c+1); } // Down right
+		catch(IndexOutOfBoundsException e){};
 	}
 	
 	// Check if player lost a game
@@ -141,6 +175,11 @@ public class MineSweeper{
 		return this.gameOver;
 	}
 	
+	// Check if player wins
+	public boolean win()
+	{
+		return (this.board.length*this.board[0].length - this.numVisible) == this.numMines;
+	}
 	
 	// String representation of game board for player
 	// '?' for a unrevealed tile
@@ -149,10 +188,16 @@ public class MineSweeper{
 	// '1-8' represen number of mines in surrounding tiles
 	public String toString()
 	{
-        String repr = "" + new String(new char[this.board[0].length*2 +3]).replace("\0","-") + "\n";
+        String repr = "   ";
+		for(int i = 0; i < this.board[0].length; i++)
+		{
+			repr += String.format("%2d",i);
+		}
+		
+		repr += "\n" + new String(new char[this.board[0].length*2 +5]).replace("\0","-") + "\n";
         for(int r = 0; r < this.board.length; r++)
 		{
-			repr += "| ";
+			repr += String.format("%2d| ",r);
 			for(int c = 0; c < this.board[0].length; c++)
 			{
 				if(this.board[r][c].visible == false)
@@ -180,7 +225,7 @@ public class MineSweeper{
 			}
 			repr += "|\n";
 		}
-		repr += new String(new char[this.board[0].length*2 +3]).replace("\0","-");
+		repr += new String(new char[this.board[0].length*2 +5]).replace("\0","-");
 		return repr;
     }
 	
@@ -191,10 +236,29 @@ public class MineSweeper{
 		{
 			for(int c = 0; c < this.board[0].length; c++)
 			{
-				this.reveal(r,c);
+				this.board[r][c].visible = true;
 			}
 		}
 		System.out.println(this);
+	}
+	
+	// Make all tile invisible
+	private void coverAll()
+	{
+		for(int r = 0; r < this.board.length; r++)
+		{
+			for(int c = 0; c < this.board[0].length; c++)
+			{
+				this.board[r][c].visible = false;;
+			}
+		}
+	}
+
+	// A cheat for debugging only!;
+	private void cheat()
+	{
+		this.revealAll();
+		this.coverAll();
 	}
 	
 	public static void main(String[] args)
@@ -211,16 +275,25 @@ public class MineSweeper{
 		// Create new game accordingly
 		MineSweeper game = new MineSweeper(gameWidth, gameHeight, gameDifficulty);
 		System.out.println(game);
-		// Keep asking player for next move until game is over
-		while(!game.gameIsOver())
+		game.cheat();
+		// Keep asking player for next move until gameOver or victory
+		while(!game.gameIsOver() &&  !game.win())
 		{
 			System.out.print("Next move (r c): ");
 			game.reveal(sc.nextInt(), sc.nextInt());
 			System.out.println(game);
 		}
-		// Reveal all tile if game is over
-		game.revealAll();
-		System.out.println("Game Over! :(");
+		// Check if player win or lose
+		if(game.win())
+		{
+			System.out.println("You WIN!");
+		}
+		else
+		{
+			// Reveal all tile if game is over
+			game.revealAll();
+			System.out.println("Game Over! :(");
+		}
 		
 	}
 }
