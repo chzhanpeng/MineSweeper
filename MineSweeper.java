@@ -6,16 +6,16 @@ import java.util.Scanner;
 public class MineSweeper{
 	
 	// Tile objects to place on the board
-	public static class Tile{
+	protected static class Tile{
 		
 		// True for tile with mine, false for no mine
-		public boolean mine;
+		protected boolean mine;
 		// Number of surrounding mines
-		public int surroundingMines;
+		protected int surroundingMines;
 		// Whether if the tile is revealed
-		public boolean visible;
+		protected boolean visible;
 		// Tile can be flagged as a mine
-		public boolean flag;
+		protected boolean flag;
 		
 		// Tile class constructor, initialize mine field,
 		// New tiles are always hidden with no flag
@@ -26,17 +26,17 @@ public class MineSweeper{
 			this.visible = false;
 		}
 		// Flag this tile
-		public void flag()
+		protected void flag()
 		{
 			this.flag = true;
 		}
 		// Remove flag on this tile
-		public void deflag()
+		protected void deflag()
 		{
 			this.flag = false;
 		}
 		// Reveal this tile
-		public void reveal()
+		protected void reveal()
 		{
 			this.visible = true;
 		}
@@ -62,27 +62,45 @@ public class MineSweeper{
 	public MineSweeper(int width, int height, String difficulty)
 	{
 		this.board = new Tile[width][height];
-		this.numMines = 0;
 		this.numVisible = 0;
-		Random random = new Random();
-		// Randomly generate mines on the board
-		for(int r = 0; r < this.board.length; r++)
-		{
-			for(int c = 0; c < this.board[0].length; c++)
-			{
-				if(random.nextInt(4) == 1)
-				{
-					this.numMines++;
-					this.board[r][c] = new Tile(true);
-				}
-				else
-				{
-					this.board[r][c] = new Tile(false);
-				}
-			}
-		}
 		this.difficulty = difficulty;
+		// Set number of mines based on game diffculty
+		if(difficulty.equals("easy"))
+		{
+			this.numMines = width*height/6;
+		}
+		else if(difficulty.equals("medium"))
+		{
+			this.numMines = width*height/5;
+		}
+		else
+		{
+			this.numMines = width*height/4;
+		}
+		this.randomGenerate(this.numMines);
 		this.countMines();
+	}
+	
+	// Check if player lost a game
+	public boolean lose()
+	{
+		return this.gameOver;
+	}
+	
+	// Check if player wins
+	public boolean win()
+	{
+		return (this.height()*this.width() - this.numVisible) == this.numMines;
+	}
+	
+	// Return game size
+	public int width()
+	{
+		return this.board[0].length;
+	}
+	public int height()
+	{
+		return this.board.length;
 	}
 	
 	// Return difficulty of the game
@@ -91,12 +109,43 @@ public class MineSweeper{
 		return difficulty;
 	}
 	
+	// Generate tile for each position on board
+	// Randomly select random tile to be mine; if tile is already a mine,
+	// select another tile, repeat until there are enough mines
+	private void randomGenerate(int n)
+	{
+		for(int r = 0; r < this.height(); r++)
+		{
+			for(int c = 0; c < this.width(); c++)
+			{
+				this.board[r][c] = new Tile(false);
+			}
+		}
+		Random rd = new Random();
+		int curNumMines = 0;
+		while(curNumMines < this.numMines)
+		{
+			int r, c;
+			r = rd.nextInt(this.width());
+			c = rd.nextInt(this.height());
+			if(this.board[r][c].mine == false)
+			{
+				this.board[r][c].mine = true;
+				curNumMines++;
+			}
+		}
+		
+		
+	}
+	
 	// Count number of mines in surrounding tiles for each tile
+	// This method iteratet though the board, find tiles with mine
+	// and increment surroundingMines of neighbor tiles
 	private void countMines()
 	{
-		for(int r = 0; r < this.board.length; r++)
+		for(int r = 0; r < this.height(); r++)
 		{
-			for(int c = 0; c < this.board[0].length; c++)
+			for(int c = 0; c < this.width(); c++)
 			{
 				if(this.board[r][c].mine == true)
 				{
@@ -169,16 +218,46 @@ public class MineSweeper{
 		catch(IndexOutOfBoundsException e){};
 	}
 	
-	// Check if player lost a game
-	public boolean gameIsOver()
+	
+	
+	// Solve the puzzle
+	public static void solve(MineSweeper game)
 	{
-		return this.gameOver;
+		Random rd = new Random();
+		// fill
 	}
 	
-	// Check if player wins
-	public boolean win()
+	
+	// Reveal alll tiles for debugging
+	private void revealAll()
 	{
-		return (this.board.length*this.board[0].length - this.numVisible) == this.numMines;
+		for(int r = 0; r < this.height(); r++)
+		{
+			for(int c = 0; c < this.width(); c++)
+			{
+				this.board[r][c].visible = true;
+			}
+		}
+		System.out.println(this);
+	}
+	
+	// Make all tile invisible
+	private void coverAll()
+	{
+		for(int r = 0; r < this.height(); r++)
+		{
+			for(int c = 0; c < this.width(); c++)
+			{
+				this.board[r][c].visible = false;;
+			}
+		}
+	}
+	
+	// A cheat for debugging only!;
+	private void cheat()
+	{
+		this.revealAll();
+		this.coverAll();
 	}
 	
 	// String representation of game board for player
@@ -189,16 +268,16 @@ public class MineSweeper{
 	public String toString()
 	{
         String repr = "   ";
-		for(int i = 0; i < this.board[0].length; i++)
+		for(int i = 0; i < this.width(); i++)
 		{
 			repr += String.format("%2d",i);
 		}
 		
-		repr += "\n" + new String(new char[this.board[0].length*2 +5]).replace("\0","-") + "\n";
+		repr += "\n" + new String(new char[this.width()*2 +5]).replace("\0","-") + "\n";
         for(int r = 0; r < this.board.length; r++)
 		{
 			repr += String.format("%2d| ",r);
-			for(int c = 0; c < this.board[0].length; c++)
+			for(int c = 0; c < this.width(); c++)
 			{
 				if(this.board[r][c].visible == false)
 				{
@@ -225,41 +304,17 @@ public class MineSweeper{
 			}
 			repr += "|\n";
 		}
-		repr += new String(new char[this.board[0].length*2 +5]).replace("\0","-");
+		repr += new String(new char[this.width()*2 +5]).replace("\0","-");
 		return repr;
     }
 	
-	// Reveal alll tiles for debugging
-	private void revealAll()
+	// String representation for debugging
+	// Show game information such as number of mine, game difficulty
+	public String toStringForDebugging()
 	{
-		for(int r = 0; r < this.board.length; r++)
-		{
-			for(int c = 0; c < this.board[0].length; c++)
-			{
-				this.board[r][c].visible = true;
-			}
-		}
-		System.out.println(this);
-	}
-	
-	// Make all tile invisible
-	private void coverAll()
-	{
-		for(int r = 0; r < this.board.length; r++)
-		{
-			for(int c = 0; c < this.board[0].length; c++)
-			{
-				this.board[r][c].visible = false;;
-			}
-		}
+		return String.format("numMine: %d; gameDif: %s;", this.numMines, this.difficulty);
 	}
 
-	// A cheat for debugging only!;
-	private void cheat()
-	{
-		this.revealAll();
-		this.coverAll();
-	}
 	
 	public static void main(String[] args)
 	{
@@ -277,7 +332,7 @@ public class MineSweeper{
 		System.out.println(game);
 		game.cheat();
 		// Keep asking player for next move until gameOver or victory
-		while(!game.gameIsOver() &&  !game.win())
+		while(!game.lose() &&  !game.win())
 		{
 			System.out.print("Next move (r c): ");
 			game.reveal(sc.nextInt(), sc.nextInt());
