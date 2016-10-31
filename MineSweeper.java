@@ -52,9 +52,33 @@ public class MineSweeper{
 	public boolean win()
 	{
 		return
-            this.numFlags == this.numMines ||
+            this.allFlagged() ||
             this.height()*this.width() - this.numVisible == this.numMines;
 	}
+
+    // Check if all mines are flagged
+    public boolean allFlagged()
+    {
+        for(int r=0; r<this.height(); r++)
+        {
+            for(int c=0; c<this.width(); c++)
+            {
+                if(this.board[r][c].mine == true)
+                {
+                    if(this.board[r][c].flag == false)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    // Check if a tile has a flag
+    public boolean isFlagged(int row, int col)
+    {
+        return this.board[row][col].flag;
+    }
 
 	// Return game width
 	public int width()
@@ -98,7 +122,7 @@ public class MineSweeper{
 		{
 			for(int c = 0; c < this.width(); c++)
 			{
-				this.board[r][c] = new Tile(false);
+				this.board[r][c] = new Tile(r,c,false);
 			}
 		}
 		Random rd = new Random();
@@ -314,8 +338,8 @@ public class MineSweeper{
 		}
 		game.board[1][1].mine = true;
 		game.board[5][1].mine = true;
-		game.board[1][5].mine = true;
-		game.board[5][5].mine = true;
+		game.board[1][4].mine = true;
+		game.board[4][4].mine = true;
 		game.countMines();
 		return game;
 	}

@@ -9,11 +9,15 @@ public class Tile
 	protected boolean visible;
 	// Tile can be flagged as a mine
 	protected boolean flag;
+	// Coordinate
+	protected int row, col;
 
 	// Tile class constructor, initialize mine field,
 	// New tiles are always hidden with no flag
-	protected Tile(boolean mine)
+	protected Tile(int row, int col, boolean mine)
 	{
+		this.row = row;
+		this.col = col;
 		this.mine = mine;
 		this.flag = false;
 		this.visible = false;
