@@ -20,7 +20,13 @@ public class Interactive
 		MineSweeper game = new MineSweeper(gameWidth, gameHeight, gameDifficulty);
 		System.out.println(game);
 		game.cheat();
-		// Keep asking player for next move until gameOver or victory
+		Interactive.interact(game);
+	}
+
+	// Keep asking player for next move until gameOver or victory
+	public static void interact(MineSweeper game)
+	{
+		Scanner sc = new Scanner(System.in); // Read inputs
 		while(!game.lose() && !game.win())
 		{
 			System.out.print("Next move (r c): ");

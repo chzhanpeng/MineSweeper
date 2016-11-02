@@ -333,24 +333,33 @@ public class MineSweeper{
 			for(int c=0; c<6; c++)
 			{
 				game.board[r][c].mine = false;
+                game.board[r][c].visible = false;
 				game.board[r][c].numSurroundingMines = 0;
 			}
 		}
 		game.board[1][1].mine = true;
-		game.board[5][1].mine = true;
-		game.board[1][4].mine = true;
-		game.board[4][4].mine = true;
+		game.board[1][2].mine = true;
+        game.board[1][3].mine = true;
+        game.board[1][4].mine = true;
+        game.board[2][1].mine = true;
+
+		game.board[3][5].mine = true;
+        game.board[3][1].mine = true;
+        game.board[5][0].mine = true;
+        game.board[5][1].mine = true;
+
 		game.countMines();
 		return game;
 	}
 
-
 	public static void main(String[] args)
 	{
         //MineSweeper game = MineSweeper.presetGame();
+        //System.out.println(game);
+        //game.cheat();
+        //Interactive.interact(game);
 		//Solver.testSolver(game);
 		//
-		//System.out.println(game);
 		//game.testSolver();
 	}
 }

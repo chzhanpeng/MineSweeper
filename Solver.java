@@ -1,11 +1,12 @@
 import java.util.ArrayList;
 // Solve the MineSweeper game
+import java.util.Random;
 public class Solver
 {
 
 	public static void main(String[] args)
 	{
-		MineSweeper game = MineSweeper.presetGame();
+		MineSweeper game = new MineSweeper(8,8,"easy");
 		game.cheat();
 		Solver solver = new Solver();
 		solver.solve(game);
@@ -14,22 +15,24 @@ public class Solver
 	// Method that solve the puzzle
 	public void solve(MineSweeper game)
 	{
+		Random rd = new Random();
 		// First move
 		int f1, f2;
-		f1 = 3; //rd.nextInt(game.height());
-		f2 = 3; //rd.nextInt(game.width());
+		f1 = rd.nextInt(game.height());
+		f2 = rd.nextInt(game.width());
 		game.reveal(f1,f2);
-		System.out.println(game);
 		// Iterate through board to find reveal tiles, and
 		// check if hidden tiles euqals to numSurroundingMines
 		while(!game.win())
 		{
 			this.search(game);
+			if(game.lose())
+			{
+				System.out.println("Sorry Master, I lost.");
+				return;
+			}
 		}
-		if(game.win())
-		{
-			System.out.println("I win, I as in Program.");
-		}
+		System.out.println("Master, I win!");
 	}
 
 	// Search through board to find mines
@@ -44,8 +47,13 @@ public class Solver
 				if(mines != null)
 				{
 					this.flagMines(mines);
-					System.out.println(game);
 					game.numFlags += mines.size();
+					System.out.println(game);
+				}
+				if(this.foundAllAdjacentMines(game,r,c))
+				{
+					this.revealAdjacentSafeTiles(game,r,c);
+
 				}
 			}
 		}
@@ -53,127 +61,137 @@ public class Solver
 
 	// Reveal all safe unflagged adjacent tiles in the resulting
 	// list of safe tiles from findSafeTiles
-	protected void revealTiles(MineSweeper game, ArrayList<Tile> safeTiles)
+	protected void revealAdjacentSafeTiles(MineSweeper game, int r, int c)
 	{
-		for(Tile tile : safeTiles)
-		{
-			try{											// Up left
-				if(!game.isFlagged(tile.row-1,tile.col-1)){
-					game.reveal(tile.row-1,tile.col-1);
-				}
+		try{										// Up left
+			if(!game.isFlagged(r-1,c-1))
+			{
+				game.reveal(r-1,c-1);
 			}
-			catch (IndexOutOfBoundsException e){}
-			try{											// Up
-				if(!game.isFlagged(tile.row-1,tile.col)){
-					game.reveal(tile.row-1,tile.col);
-				}
-			}catch(IndexOutOfBoundsException e){}
-			try{											// Up right
-				if(!game.isFlagged(tile.row-1,tile.col+1)){
-					game.reveal(tile.row-1,tile.col+1);
-				}
-			}catch(IndexOutOfBoundsException e){}
-			try{											// Left
-				if(!game.isFlagged(tile.row,tile.col-1)){
-					game.reveal(tile.row,tile.col-1);
-				}
-			}catch(IndexOutOfBoundsException e){}
-			try{											// Right
-				if(!game.isFlagged(tile.row,tile.col+1)){
-					game.reveal(tile.row,tile.col+1);
-				}
-			}catch(IndexOutOfBoundsException e){}
-			try{											// Down left
-				if(!game.isFlagged(tile.row+1,tile.col-1)){
-					game.reveal(tile.row+1,tile.col-1);
-				}
-			}catch(IndexOutOfBoundsException e){}
-			try{											// Down
-				if(!game.isFlagged(tile.row+1,tile.col)){
-					game.reveal(tile.row+1,tile.col);
-				}
-			}catch(IndexOutOfBoundsException e){}
-			try{											// Down right
-				if(!game.isFlagged(tile.row+1,tile.col+1)){
-					game.reveal(tile.row+1,tile.col+1);
-				}
-			}catch(IndexOutOfBoundsException e){}
-		}
+		}catch(IndexOutOfBoundsException e){}
+		try{										// Up
+			if(!game.isFlagged(r-1,c))
+			{
+				game.reveal(r-1,c);
+			}
+		}catch(IndexOutOfBoundsException e){}
+		try{										// Up right
+			if(!game.isFlagged(r-1,c+1))
+			{
+				game.reveal(r-1,c+1);
+			}
+		}catch(IndexOutOfBoundsException e){}
+		try{										// Left
+			if(!game.isFlagged(r,c-1))
+			{
+				game.reveal(r,c-1);
+			}
+		}catch(IndexOutOfBoundsException e){}
+		try{										// Right
+			if(!game.isFlagged(r,c+1))
+			{
+				game.reveal(r,c+1);
+			}
+		}catch(IndexOutOfBoundsException e){}
+		try{										// Down left
+			if(!game.isFlagged(r+1,c-1))
+			{
+				game.reveal(r+1,c-1);
+			}
+		}catch(IndexOutOfBoundsException e){}
+		try{										// Down
+			if(!game.isFlagged(r+1,c))
+			{
+				game.reveal(r+1,c);
+			}
+		}catch(IndexOutOfBoundsException e){}
+		try{										// Down right
+			if(!game.isFlagged(r+1,c+1))
+			{
+				game.reveal(r+1,c+1);
+			}
+		}catch(IndexOutOfBoundsException e){}
 	}
-
-
 
 	// Check if numSurroundingMines equals number of surrounding flagged tiles
 	// Return a list of tiles that are safe to reveal
 	// Ignore IndexOutOfBoundsException
-	protected ArrayList<Tile> findSafeTiles(MineSweeper game, int r, int c)
+	protected boolean foundAllAdjacentMines(MineSweeper game, int r, int c)
 	{
-		ArrayList<Tile> safeTiles = new ArrayList<Tile>();
 		int count = 0;
 		try{										// Up left
 			if(game.isFlagged(r-1,c-1))
 			{
 				count++;
-				safeTiles.add(game.board[r-1][c-1]);
+				if(count==game.board[r][c].numSurroundingMines){
+					return true;
+				}
 			}
 		}catch(IndexOutOfBoundsException e){}
 		try{										// Up
 			if(game.isFlagged(r-1,c))
 			{
 				count++;
-				safeTiles.add(game.board[r-1][c]);
+				if(count==game.board[r][c].numSurroundingMines){
+					return true;
+				}
 			}
 		}catch(IndexOutOfBoundsException e){}
 		try{										// Up right
 			if(game.isFlagged(r-1,c+1))
 			{
 				count++;
-				safeTiles.add(game.board[r-1][c+1]);
+				if(count==game.board[r][c].numSurroundingMines){
+					return true;
+				}
 			}
 		}catch(IndexOutOfBoundsException e){}
 		try{										// Left
 			if(game.isFlagged(r,c-1))
 			{
 				count++;
-				safeTiles.add(game.board[r][c-1]);
+				if(count==game.board[r][c].numSurroundingMines){
+					return true;
+				}
 			}
 		}catch(IndexOutOfBoundsException e){}
 		try{										// Right
 			if(game.isFlagged(r,c+1))
 			{
 				count++;
-				safeTiles.add(game.board[r][c+1]);
+				if(count==game.board[r][c].numSurroundingMines){
+					return true;
+				}
 			}
 		}catch(IndexOutOfBoundsException e){}
 		try{										// Down left
 			if(game.isFlagged(r+1,c-1))
 			{
 				count++;
-				safeTiles.add(game.board[r+1][c-1]);
+				if(count==game.board[r][c].numSurroundingMines){
+					return true;
+				}
 			}
 		}catch(IndexOutOfBoundsException e){}
 		try{										// Down
 			if(game.isFlagged(r+1,c))
 			{
 				count++;
-				safeTiles.add(game.board[r+1][c]);
+				if(count==game.board[r][c].numSurroundingMines){
+					return true;
+				}
 			}
 		}catch(IndexOutOfBoundsException e){}
 		try{										// Down right
 			if(game.isFlagged(r+1,c+1))
 			{
 				count++;
-				safeTiles.add(game.board[r+1][c+1]);
+				if(count==game.board[r][c].numSurroundingMines){
+					return true;
+				}
 			}
 		}catch(IndexOutOfBoundsException e){}
-		if(count > game.board[r][c].numSurroundingMines)
-		{
-			return null;
-		}
-		else
-		{
-			return safeTiles;
-		}
+		return false;
 	}
 
 
