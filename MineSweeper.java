@@ -1,9 +1,7 @@
 // Use random to generate mines
 import java.util.Random;
 
-
 public class MineSweeper{
-
 
 	// Each tile has the following fields:
 	// Game board consists a matrix of tile object as mines,
@@ -39,7 +37,7 @@ public class MineSweeper{
 			this.numMines = width*height/4;
 		}
 		this.randomGenerate(this.numMines);
-		this.countMines();
+		this.countAdjacentMines();
 	}
 
 	// Check if player lost a game
@@ -141,9 +139,9 @@ public class MineSweeper{
 	}
 
 	// Count number of mines in adjacent tiles for each tile
-	// This method iteratet though the board, find tiles with mine
+	// This method iterate though the board, find tiles with mine
 	// and increment numSurroundingMines of neighbor tiles
-	protected void countMines()
+	protected void countAdjacentMines()
 	{
 		for(int r = 0; r < this.height(); r++)
 		{
@@ -173,9 +171,8 @@ public class MineSweeper{
 	}
 
 	// Reveal a tile that player choose
-	// First check if the tile is a mine, if so, set gameOver to true
-	// If a tile is blank tile, reveal its neighbors
-	// Print board each time a tile is revealed safely
+	// First check if the tile is a mine, game is over if so
+	// Then check if a tile is blank tile, reveal its neighbors also
 	public void reveal(int r, int c)
 	{
 		if(this.board[r][c].mine == true)
@@ -198,26 +195,27 @@ public class MineSweeper{
 		}
 	}
 
-	// Reveal any non-mine neighbors, recursively reveal all adjcent safe
-	// tiles, stop until adjcent tile that has any surrouding mines
+	// Reveal safe neighboring tiles
+    // Recursively revealNeighbor for the adjacent safe tiles,
+	// stop until adjcent tile that has any surrouding mines
     // Ignore IndexOutOfBoundsException
 	protected void revealNeighbor(int r, int c)
 	{
-		try{ this.reveal(r-1,c-1); } // Up left
+		try{ this.reveal(r-1,c-1); }       // Up left
 		catch(IndexOutOfBoundsException e){};
-		try{ this.reveal(r-1,c); }   // Up
+		try{ this.reveal(r-1,c); }         // Up
 		catch(IndexOutOfBoundsException e){};
-		try{ this.reveal(r-1,c+1); } // Up right
+		try{ this.reveal(r-1,c+1); }       // Up right
 		catch(IndexOutOfBoundsException e){};
-		try{ this.reveal(r,c-1); }   // Left
+		try{ this.reveal(r,c-1); }         // Left
 		catch(IndexOutOfBoundsException e){};
-		try{ this.reveal(r,c+1); }   // Right
+		try{ this.reveal(r,c+1); }         // Right
 		catch(IndexOutOfBoundsException e){};
-		try{ this.reveal(r+1,c-1); } // Down left
+		try{ this.reveal(r+1,c-1); }       // Down left
 		catch(IndexOutOfBoundsException e){};
-		try{ this.reveal(r+1,c); }   // Down
+		try{ this.reveal(r+1,c); }         // Down
 		catch(IndexOutOfBoundsException e){};
-		try{ this.reveal(r+1,c+1); } // Down right
+		try{ this.reveal(r+1,c+1); }       // Down right
 		catch(IndexOutOfBoundsException e){};
 	}
 
@@ -245,8 +243,8 @@ public class MineSweeper{
 		}
 	}
 
-	// A cheat for debugging only
-	// Reveal all tile and then cover all tile
+	// A cheat for testing purpose
+	// Reveal all tiles and then cover all tiles
 	protected void cheat()
 	{
 		this.revealAll();
@@ -338,17 +336,7 @@ public class MineSweeper{
 			}
 		}
 		game.board[1][1].mine = true;
-		game.board[1][2].mine = true;
-        game.board[1][3].mine = true;
-        game.board[1][4].mine = true;
-        game.board[2][1].mine = true;
-
-		game.board[3][5].mine = true;
-        game.board[3][1].mine = true;
-        game.board[5][0].mine = true;
-        game.board[5][1].mine = true;
-
-		game.countMines();
+		game.countAdjacentMines();
 		return game;
 	}
 

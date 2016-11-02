@@ -2,6 +2,7 @@
 import java.util.ArrayList;
 // Use random to make first move
 import java.util.Random;
+
 // Solve the MineSweeper game
 // The game must be guess free after first move in order to solve puzzle completely
 public class Solver
@@ -27,6 +28,7 @@ public class Solver
 		f1 = rd.nextInt(game.height());
 		f2 = rd.nextInt(game.width());
 		game.reveal(f1,f2);
+		// Keep searching until win
 		while(!game.win())
 		{
 			this.search(game);
@@ -39,8 +41,9 @@ public class Solver
 		System.out.println("Master, I win!");
 	}
 
-	// Search through board to find mines
-	// Uses findMines
+	// Search through board to findMines and find safe tile
+	// uses findMines to find mines and use foundAllAdjacentMines
+	// to find safe tiles
 	protected void search(MineSweeper game)
 	{
 		for(int r = 0; r < game.height(); r++)
@@ -52,19 +55,17 @@ public class Solver
 				{
 					this.flagMines(mines);
 					game.numFlags += mines.size();
-					System.out.println(game);
 				}
 				if(this.foundAllAdjacentMines(game,r,c))
 				{
 					this.revealAdjacentSafeTiles(game,r,c);
-
 				}
 			}
 		}
 	}
 
-	// Reveal all safe unflagged adjacent tiles in the resulting
-	// list of safe tiles from findSafeTiles
+	// Reveal all safe unflagged adjacent tiles
+	// Use foundAllAdjacentMines to check if tile is safe to use this method
 	protected void revealAdjacentSafeTiles(MineSweeper game, int r, int c)
 	{
 		try{										// Up left
@@ -117,6 +118,7 @@ public class Solver
 		}catch(IndexOutOfBoundsException e){}
 	}
 
+	// Check if a tile has adjacent mines all flagged
 	// Check if numSurroundingMines equals number of surrounding flagged tiles
 	// Return true if all neighbor mines have been found
 	// Ignore IndexOutOfBoundsException
@@ -196,16 +198,6 @@ public class Solver
 			}
 		}catch(IndexOutOfBoundsException e){}
 		return false;
-	}
-
-
-	// Flag all tile as mine in given list of tiles
-	protected  void flagMines(ArrayList<Tile> mines)
-	{
-		for(Tile mine: mines)
-		{
-			mine.flag = true;
-		}
 	}
 
 	// Check if number of surrouding hidden tiles equals numSurroundingMines
@@ -289,6 +281,15 @@ public class Solver
 			}
 		}catch( IndexOutOfBoundsException e){};
 		return mines;
+	}
+
+	// Flag all tile as mine in given list of tiles
+	protected  void flagMines(ArrayList<Tile> mines)
+	{
+		for(Tile mine: mines)
+		{
+			mine.flag = true;
+		}
 	}
 
 }
