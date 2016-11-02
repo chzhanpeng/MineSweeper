@@ -1,6 +1,9 @@
+// To store a list of tiles
 import java.util.ArrayList;
-// Solve the MineSweeper game
+// Use random to make first move
 import java.util.Random;
+// Solve the MineSweeper game
+// The game must be guess free after first move in order to solve puzzle completely
 public class Solver
 {
 
@@ -13,6 +16,9 @@ public class Solver
 	}
 
 	// Method that solve the puzzle
+	// First move always random
+	// Iterate through the board and use foundAllAdjacentMines to find mines
+	// and use findAdjacentSafeMines to find safe tiles until victory
 	public void solve(MineSweeper game)
 	{
 		Random rd = new Random();
@@ -21,8 +27,6 @@ public class Solver
 		f1 = rd.nextInt(game.height());
 		f2 = rd.nextInt(game.width());
 		game.reveal(f1,f2);
-		// Iterate through board to find reveal tiles, and
-		// check if hidden tiles euqals to numSurroundingMines
 		while(!game.win())
 		{
 			this.search(game);
@@ -114,7 +118,7 @@ public class Solver
 	}
 
 	// Check if numSurroundingMines equals number of surrounding flagged tiles
-	// Return a list of tiles that are safe to reveal
+	// Return true if all neighbor mines have been found
 	// Ignore IndexOutOfBoundsException
 	protected boolean foundAllAdjacentMines(MineSweeper game, int r, int c)
 	{
@@ -205,7 +209,8 @@ public class Solver
 	}
 
 	// Check if number of surrouding hidden tiles equals numSurroundingMines
-	// Return a list of tiles that are 100% mines
+	// If condition is met, that means all hidden tiles are mines,
+	// Return those hidden tiles as a list
 	// Ignore IndexOutOfBoundsException
 	protected ArrayList<Tile> findMines(MineSweeper game, int r, int c)
 	{
