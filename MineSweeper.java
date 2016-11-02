@@ -36,7 +36,7 @@ public class MineSweeper{
 		{
 			this.numMines = width*height/4;
 		}
-		this.randomGenerate(this.numMines);
+		this.generate(this.numMines);
 		this.countAdjacentMines();
 	}
 
@@ -110,34 +110,17 @@ public class MineSweeper{
 		return difficulty;
 	}
 
-	// Generate mines randomly
-	// Generate tile for each position on board
-	// Randomly select random tile to be mine; if tile is already a mine,
-	// select another tile, repeat until there are enough mines
-	protected void randomGenerate(int n)
-	{
-		for(int r = 0; r < this.height(); r++)
-		{
-			for(int c = 0; c < this.width(); c++)
-			{
-				this.board[r][c] = new Tile(r,c,false);
-			}
-		}
-		Random rd = new Random();
-		int curNumMines = 0;
-		while(curNumMines < this.numMines)
-		{
-			int r, c;
-			r = rd.nextInt(this.height());
-			c = rd.nextInt(this.width());
-			if(this.board[r][c].mine == false)
-			{
-				this.board[r][c].mine = true;
-				curNumMines++;
-			}
-		}
-	}
-
+    public void generate(int numMines)
+    {
+        for(int r = 0; r < this.height(); r++)
+        {
+            for(int c = 0; c < this.width(); c++)
+            {
+                this.board[r][c] = new Tile(r,c,false);
+            }
+        }
+        Generator.randomGenerate(this, numMines);
+    }
 	// Count number of mines in adjacent tiles for each tile
 	// This method iterate though the board, find tiles with mine
 	// and increment numSurroundingMines of neighbor tiles
