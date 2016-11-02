@@ -24,13 +24,26 @@ public class Interactive
 	}
 
 	// Keep asking player for next move until gameOver or victory
+	// Player can choose to flag, unlfag or reveal a tile
 	public static void interact(MineSweeper game)
 	{
 		Scanner sc = new Scanner(System.in); // Read inputs
 		while(!game.lose() && !game.win())
 		{
-			System.out.print("Next move (r c): ");
-			game.reveal(sc.nextInt(), sc.nextInt());
+			System.out.print("Next move (flag/unflag/reveal r c): ");
+			String nextMove = sc.next();
+			if(nextMove.equals("flag"))
+			{
+				game.flag(sc.nextInt(), sc.nextInt());
+			}
+			else if(nextMove.equals("unflag"))
+			{
+				game.unflag(sc.nextInt(), sc.nextInt());
+			}
+			else
+			{
+				game.reveal(sc.nextInt(), sc.nextInt());
+			}
 			System.out.println(game);
 		}
 		// Check if player win or lose
