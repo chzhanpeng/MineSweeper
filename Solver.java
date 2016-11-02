@@ -10,7 +10,7 @@ public class Solver
 
 	public static void main(String[] args)
 	{
-		MineSweeper game = new MineSweeper(8,8,"easy");
+		MineSweeper game = new MineSweeper(20,20,"easy");
 		game.cheat();
 		Solver solver = new Solver();
 		solver.solve(game);
@@ -24,14 +24,13 @@ public class Solver
 	{
 		Random rd = new Random();
 		// First move
-		int f1, f2;
-		f1 = rd.nextInt(game.height());
-		f2 = rd.nextInt(game.width());
-		game.reveal(f1,f2);
+		int[] firstMove = Solver.firstMove(game.height(), game.width());
+		game.reveal(firstMove[0],firstMove[1]);
 		// Keep searching until win
 		while(!game.win())
 		{
 			this.search(game);
+			System.out.println(game);
 			if(game.lose())
 			{
 				System.out.println("Sorry Master, I lost.");
@@ -39,6 +38,13 @@ public class Solver
 			}
 		}
 		System.out.println("Master, I win!");
+	}
+
+	public static int[] firstMove(int h, int w)
+	{
+		Random rd = new Random();
+		int[] firstMove = {rd.nextInt(h),rd.nextInt(w)};
+		return firstMove;
 	}
 
 	// Search through board to findMines and find safe tile
