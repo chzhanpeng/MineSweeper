@@ -330,7 +330,6 @@ public class MineSweeper{
         //game.cheat();
         //Interactive.interact(game);
 		//Solver.testSolver(game);
-		//
 		//game.testSolver();
 	}
 }
