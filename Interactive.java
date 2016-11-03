@@ -19,7 +19,6 @@ public class Interactive
 		// Create new game
 		MineSweeper game = new MineSweeper(gameWidth, gameHeight, gameDifficulty);
 		System.out.println(game);
-		game.cheat();
 		Interactive.interact(game);
 	}
 
@@ -28,6 +27,10 @@ public class Interactive
 	public static void interact(MineSweeper game)
 	{
 		Scanner sc = new Scanner(System.in); // Read inputs
+		System.out.print("Next move (flag/unflag/reveal r c): ");
+		game.reveal(sc.nextInt(), sc.nextInt());
+		System.out.println(game.numVisible);
+
 		while(!game.lose() && !game.win())
 		{
 			System.out.print("Next move (flag/unflag/reveal r c): ");
