@@ -10,9 +10,9 @@ public class Solver
 
 	public static void main(String[] args)
 	{
-		MineSweeper game = new MineSweeper(20,20,"easy");
-		game.cheat();
+		MineSweeper game = new MineSweeper(20, 20, "medium");
 		Solver solver = new Solver();
+		System.out.println(game);
 		solver.solve(game);
 	}
 
@@ -24,34 +24,37 @@ public class Solver
 	{
 		Random rd = new Random();
 		// First move
-		int[] firstMove = Solver.firstMove(game.height(), game.width());
-		game.reveal(firstMove[0],firstMove[1]);
+		int r,c;
+		r = rd.nextInt(game.height());
+		c = rd.nextInt(game.width());
+		System.out.println(String.format("first move: %d %d",r,c));
+		game.reveal(r,c);
 		// Keep searching until win
-		while(!game.win())
+		int step = 0;
+		while(!game.win() && !game.lose())
 		{
-			this.search(game);
-			System.out.println(game);
-			if(game.lose())
+			if(this.search(game))
 			{
-				System.out.println("Sorry Master, I lost.");
+				System.out.println("No move can be taken without gussing.");
 				return;
 			}
 		}
-		System.out.println("Master, I win!");
-	}
-
-	public static int[] firstMove(int h, int w)
-	{
-		Random rd = new Random();
-		int[] firstMove = {rd.nextInt(h),rd.nextInt(w)};
-		return firstMove;
+		if(game.lose())
+		{
+			System.out.println("Sorry Master, I lost.");
+			return;
+		}else{
+			//System.out.println(game);
+			System.out.println("Master, I win!");
+		}
 	}
 
 	// Search through board to findMines and find safe tile
 	// uses findMines to find mines and use foundAllAdjacentMines
 	// to find safe tiles
-	protected void search(MineSweeper game)
+	protected boolean search(MineSweeper game)
 	{
+		boolean clueless = true;
 		for(int r = 0; r < game.height(); r++)
 		{
 			for(int c = 0; c < game.width(); c++)
@@ -59,15 +62,18 @@ public class Solver
 				ArrayList<Tile> mines = this.findMines(game,r,c);
 				if(mines != null)
 				{
+					clueless = false;
 					this.flagMines(mines);
 					game.numFlags += mines.size();
 				}
 				if(this.foundAllAdjacentMines(game,r,c))
 				{
+					clueless = false;
 					this.revealAdjacentSafeTiles(game,r,c);
 				}
 			}
 		}
+		return clueless;
 	}
 
 	// Reveal all safe unflagged adjacent tiles
