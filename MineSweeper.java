@@ -19,6 +19,7 @@ public class MineSweeper {
     // Keep track of first move, this helps in generating mines
     protected int fmRow;
     protected int fmCol;
+    // Whether it's brand new game/ no move taken
     protected boolean fresh;
 
     // Constructor, initialize fields and generate mines
