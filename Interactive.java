@@ -66,6 +66,7 @@ public class Interactive
 		{
 			// Reveal all tile if game is over
 			game.revealAll();
+			System.out.println(game);
 			System.out.println("Game Over! :(");
 		}
 	}
