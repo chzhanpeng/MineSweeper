@@ -1,9 +1,5 @@
-// Use random to generate mines
-import java.util.Random;
-
 public class MineSweeper {
 
-    // Each tile has the following fields:
     // Game board consists a matrix of tile object as mines,
     protected Tile[][] board;
     // Difficulty of the game
@@ -17,8 +13,7 @@ public class MineSweeper {
     // Whether the game is over
     protected boolean gameOver;
     // Keep track of first move, this helps in generating mines
-    protected int fmRow;
-    protected int fmCol;
+    protected int fmRow, fmCol;
     // Whether it's brand new game/ no move taken
     protected boolean fresh;
 
@@ -27,6 +22,9 @@ public class MineSweeper {
     {
         this.board = new Tile[width][height];
         this.numVisible = 0;
+        this.numMines = 0;
+        this.numFlags = 0;
+        this.fresh = true;
         this.difficulty = difficulty;
         // Set number of mines based on game diffculty
         if(difficulty.equals("easy"))
@@ -41,7 +39,6 @@ public class MineSweeper {
         {
             this.numMines = width*height/4;
         }
-        this.fresh = true;
         this.initBoard();
     }
 
@@ -80,10 +77,22 @@ public class MineSweeper {
         return true;
     }
 
+    // Check if a tile is visible
+    public boolean isVisible(int row, int col)
+    {
+        return this.board[row][col].visible;
+    }
+
     // Check if a tile has a flag
     public boolean isFlagged(int row, int col)
     {
         return this.board[row][col].flag;
+    }
+
+    // Return number of surrounding mines
+    public int numSurroundingMines(int row, int col)
+    {
+        return this.board[row][col].numSurroundingMines;
     }
 
     // Return game width
@@ -118,7 +127,7 @@ public class MineSweeper {
         return difficulty;
     }
 
-    // Initialize board, creates tiles for each position on board
+    // Initialize board, create tiles for each position on board
     public void initBoard()
     {
         for(int r = 0; r < this.height(); r++)
@@ -130,10 +139,9 @@ public class MineSweeper {
         }
     }
 
-    // Reveal a tile that player choose
-    // Check if the move is first move, generate game if after first move
-    // Then check if the tile is a mine, game is over if so
-    // Then check if a tile is blank tile, reveal its neighbors also
+    // Reveal a tile that player choose, check if the move is first move,
+    // generate game after first move; check if the tile is a mine, game is
+    // over if so, reveal its neighbors if a tile is blank tile
     public void reveal(int r, int c)
     {
         if(this.fresh)
@@ -143,6 +151,7 @@ public class MineSweeper {
             this.fmCol = c;
             Generator gnrt = new Generator();
             gnrt.randomGenerate(this, this.numMines);
+            //gnrt.smartGenerate(this, this.numMines);
             this.numVisible++;
             this.board[r][c].visible = true;
             // reveal adjacent tiles when it's blank tile
@@ -153,7 +162,7 @@ public class MineSweeper {
         }
         else
         {
-            if(this.board[r][c].mine == true)
+            if(this.board[r][c].mine == true) // Check if a tile is a mine
             {
                 this.gameOver = true;
                 this.revealAll();
@@ -174,31 +183,46 @@ public class MineSweeper {
         }
     }
 
-    // Reveal safe neighboring tiles
-    // Recursively revealNeighbor for the adjacent safe tiles,
-    // stop until adjcent tile that has any surrouding mines
-    // Ignore IndexOutOfBoundsException
+    // Reveal safe neighboring tiles, Recursively revealNeighbor for the
+    // adjacent safe tiles, stop until adjcent tile that has more than 0
+    // numSurroundingMines
     protected void revealNeighbor(int r, int c)
     {
-        try{ this.reveal(r-1,c-1); } // Up left
+        try{                                     // Up left
+            this.reveal(r-1,c-1);
+        }
         catch(IndexOutOfBoundsException e) {};
-        try{ this.reveal(r-1,c); } // Up
+        try{                                     // Up
+            this.reveal(r-1,c);
+        }
         catch(IndexOutOfBoundsException e) {};
-        try{ this.reveal(r-1,c+1); } // Up right
+        try{                                     // Up right
+            this.reveal(r-1,c+1);
+        }
         catch(IndexOutOfBoundsException e) {};
-        try{ this.reveal(r,c-1); } // Left
+        try{                                     // Left
+            this.reveal(r,c-1);
+        }
         catch(IndexOutOfBoundsException e) {};
-        try{ this.reveal(r,c+1); } // Right
+        try{                                     // Right
+            this.reveal(r,c+1);
+        }
         catch(IndexOutOfBoundsException e) {};
-        try{ this.reveal(r+1,c-1); } // Down left
+        try{                                     // Down left
+            this.reveal(r+1,c-1);
+        }
         catch(IndexOutOfBoundsException e) {};
-        try{ this.reveal(r+1,c); } // Down
+        try{                                     // Down
+            this.reveal(r+1,c);
+        }
         catch(IndexOutOfBoundsException e) {};
-        try{ this.reveal(r+1,c+1); } // Down right
+        try{                                     // Down right
+            this.reveal(r+1,c+1);
+        }
         catch(IndexOutOfBoundsException e) {};
     }
 
-    // Reveal all tiles for debugging
+    // Reveal all tiles and print game
     protected void revealAll()
     {
         for(int r = 0; r < this.height(); r++)
@@ -211,8 +235,7 @@ public class MineSweeper {
         System.out.println(this);
     }
 
-    // A cheat for testing purpose ONLY
-    // Draw board with all mines marked
+    // A cheat for testing purpose ONLY, draw board with all mines marked
     protected void cheat()
     {
         String repr = "   ";
@@ -220,8 +243,9 @@ public class MineSweeper {
         {
             repr += String.format("%2d",i);
         }
-
-        repr += "\n" + new String(new char[this.width()*2 +5]).replace("\0","-") + "\n";
+        repr += "\n";
+        repr += new String(new char[this.width()*2 +5]).replace("\0","-");
+        repr += "\n";
         for(int r = 0; r < this.board.length; r++)
         {
             repr += String.format("%2d| ",r);
@@ -251,7 +275,6 @@ public class MineSweeper {
         System.out.println(repr);
     }
 
-
     // String representation of game board for player
     // '?' for a unrevealed tile
     // '*' for a revealed tile with mine
@@ -260,7 +283,7 @@ public class MineSweeper {
     //    0 1 2 3
     //-------------
     // 0| ? ? ? ? |
-    // 1| ? ? ? ? |
+    // 1| ? ? ! ? |
     // 2| ? ? ? ? |
     // 3| ? ? ? ? |
     //-------------
@@ -271,8 +294,9 @@ public class MineSweeper {
         {
             repr += String.format("%2d",i);
         }
-
-        repr += "\n" + new String(new char[this.width()*2 +5]).replace("\0","-") + "\n";
+        repr += "\n";
+        repr += new String(new char[this.width()*2 +5]).replace("\0","-");
+        repr += "\n";
         for(int r = 0; r < this.board.length; r++)
         {
             repr += String.format("%2d| ",r);
@@ -302,7 +326,8 @@ public class MineSweeper {
                             }
                             else
                             {
-                                repr += this.board[r][c].numSurroundingMines + " ";
+                                repr += this.board[r][c].numSurroundingMines;
+                                repr += " ";
                             }
                         }
                     }
@@ -318,12 +343,16 @@ public class MineSweeper {
     // Show game information such as number of mine, game difficulty
     public String toStringForDebugging()
     {
-        return String.format("numMine: %d; numFLags: %s;", this.numMines, this.numFlags);
+        String repr = String.format("Number of Mines: %s\n", this.numMines);
+        repr += String.format("Number of Flags: %s\n", this.numFlags);
+        repr += String.format("Number of Visible: %s\n", this.numVisible);
+        return repr;
     }
 
     // Preset a board with mines at desired location
     protected static MineSweeper presetGame()
     {
+        Generator gnrt = new Generator();
         MineSweeper game = new MineSweeper(6,6,"easy");
         for(int r=0; r<6; r++)
         {
@@ -335,7 +364,6 @@ public class MineSweeper {
             }
         }
         game.board[1][1].mine = true;
-        Generator gnrt = new Generator();
         gnrt.countAdjacentMines(game);
         return game;
     }
@@ -344,6 +372,4 @@ public class MineSweeper {
     {
 
     }
-
-
 }
