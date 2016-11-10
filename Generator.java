@@ -1,24 +1,25 @@
 import java.util.Random;
 
-// Class used to generate mines
+// Class to generate mines
 public class Generator{
 
     // Generate mines randomly
-    // Generate tile for each position on board
     // Randomly select random tile to be mine; if tile is already a mine,
     // select another tile, repeat until there are enough mines
     protected void randomGenerate(MineSweeper game, int numMines)
     {
         Random rd = new Random();
         int curNumMines = 0;
+        // Keep adding mines until desired number of mines
         while(curNumMines < numMines)
         {
+            // Randomly select position to place mine
+            // Reselect for invalid position
             int r, c;
             r = rd.nextInt(game.height());
             c = rd.nextInt(game.width());
-            // Don't set mine on and one unti around first move
-            if(r < game.fmRow+2 && r > game.fmRow-2 &&
-            c < game.fmCol+2 && c > game.fmCol-2)
+            while(r < game.fmRow+2 && r > game.fmRow-2 &&
+               c < game.fmCol+2 && c > game.fmCol-2)
             {
                 r = rd.nextInt(game.height());
                 c = rd.nextInt(game.width());
@@ -32,19 +33,53 @@ public class Generator{
         this.countAdjacentMines(game);
     }
 
-    // Guess-free game generator
+    // Generate guess-free game, use solver to check if game is solvable
+    // each time a mine is added
     protected void smartGenerate(MineSweeper game, int numMines)
     {
         Random rd = new Random();
+        Solver solver = new Solver(game);
         int curNumMines = 0;
         while(curNumMines < numMines)
         {
+            // Randomly select position to place mine
+            // Reselect for invalid position
             int r, c;
             r = rd.nextInt(game.height());
             c = rd.nextInt(game.width());
+            while(r < game.fmRow+2 && r > game.fmRow-2 &&
+               c < game.fmCol+2 && c > game.fmCol-2)
+            {
+                r = rd.nextInt(game.height());
+                c = rd.nextInt(game.width());
+            }
+            if(game.board[r][c].mine == false)
+            {
+                game.board[r][c].mine = true;
+                this.resetNumSurroundingMines(game);
+                this.countAdjacentMines(game);
+                if(!solver.solve())
+                {
+                    game.board[r][c].mine = false;
+                    //game.fresh = true;
+                    continue;
+                }
+                curNumMines++;
+            }
         }
     }
 
+    // Reset number of surrounding mines for the board
+    protected void resetNumSurroundingMines(MineSweeper game)
+    {
+        for(int r = 0; r < game.height(); r++)
+        {
+            for(int c = 0; c < game.width(); c++)
+            {
+                game.board[r][c].numSurroundingMines = 0;
+            }
+        }
+    }
 
     // Count number of mines in adjacent tiles for each tile
     // This method iterate though the board, find tiles with mine
