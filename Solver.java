@@ -23,15 +23,17 @@ public class Solver
 	public boolean solve()
 	{
 		System.out.println(game.toStringForDebugging());
-		Random rd = new Random();
-		int r,c;                		           // First move
-		r = rd.nextInt(game.height());
-		c = rd.nextInt(game.width());
-		System.out.println(String.format("First Move: %d %d",r,c));
-		game.reveal(r,c);
-		System.out.println(game);
 
+		//System.out.println(game);
+		this.randomFirstPick();
 		// Keep searching until win
+		this.gameLoop();
+		return this.checkResult();
+	}
+
+	// Main game loop, continue until winning or lost
+	protected void gameLoop()
+	{
 		while(!game.win() && !game.lose())
 		{
 			String prevRound = game.toString();
@@ -43,11 +45,33 @@ public class Solver
 			}
 			System.out.println(game.toStringForDebugging());
 			System.out.println(game);
-
 		}
+	}
+
+	// Reveal given tile as first move
+	protected void fisrtPick(int row, int col)
+	{
+		System.out.println(String.format("First Move: %d %d", row, col));
+		game.reveal(row, col);
+	}
+
+	// Pick and reveal randomly as first move
+	protected void randomFirstPick()
+	{
+		Random rd = new Random();
+		int r,c;                		           // First move
+		r = rd.nextInt(game.height());
+		c = rd.nextInt(game.width());
+		System.out.println(String.format("First Move: %d %d",r,c));
+		game.reveal(r,c);
+	}
+
+	// Check result after game also print result
+	protected boolean checkResult()
+	{
 		if(game.win())
 		{
-			System.out.println(game);
+			//System.out.println(game);
 			System.out.println("Master, I win!");
 			return true;
 		}
@@ -58,7 +82,7 @@ public class Solver
 		}
 		else
 		{
-			System.out.println(game);
+			//System.out.println(game);
 			System.out.println("ERROR!");
 			return false;
 		}
