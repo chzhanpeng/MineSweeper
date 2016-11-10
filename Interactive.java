@@ -23,7 +23,14 @@ public class Interactive
                 }
 		// Ask player for game difficulty
 		System.out.print("Enter game difficulty (easy/medium/hard): ");
-		String gameDifficulty = sc.next();
+		String gameDifficulty = sc.next().toLowerCase();
+		// Force the player to choose a valid difficulty String
+		while (!gameDifficulty.equals("easy") && !gameDifficulty.equals("medium") && !gameDifficulty.equals("hard")  )
+                {
+                    System.out.println("ERROR! Invalid difficulty");
+                    System.out.print("Enter game difficulty (easy/medium/hard): ");
+                    gameDifficulty = sc.next().toLowerCase();
+                }
 		// Create new game
 		MineSweeper game = new MineSweeper(gameWidth, gameHeight, gameDifficulty);
 		System.out.println(game);
