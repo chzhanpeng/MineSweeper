@@ -1,336 +1,410 @@
-// To store a list of tiles
 import java.util.ArrayList;
-// Use random to make first move
 import java.util.Random;
-//
-import java.util.HashSet;
 
 // Solve the MineSweeper game
-// The game must be guess free after first move in order to solve puzzle completely
 public class Solver
 {
+	protected MineSweeper game;
 
-	protected HashSet<Coord> visited ;//Store all visted coordinates
-
-	public Solver()
+	public Solver(MineSweeper game)
 	{
-		this.visited = new HashSet<Coord>();
+		this.game = game;
 	}
-
 	public static void main(String[] args)
 	{
-		MineSweeper game = new MineSweeper(20, 20, "medium");
-		Solver solver = new Solver();
-		solver.solve(game);
+		MineSweeper game = new MineSweeper(10, 10, "medium");
+		Solver solver = new Solver(game);
+		solver.solve();
 	}
 
-	// Method that solve the puzzle
-	// First move always random
+	// Method that solve the puzzle, first move always random
 	// Iterate through the board and use foundAllAdjacentMines to find mines
 	// and use findAdjacentSafeMines to find safe tiles until victory
-	public void solve(MineSweeper game)
+	public boolean solve()
 	{
+		System.out.println(game.toStringForDebugging());
 		Random rd = new Random();
-		// First move
-		int r,c;
+		int r,c;                		           // First move
 		r = rd.nextInt(game.height());
 		c = rd.nextInt(game.width());
-		System.out.println(String.format("first move: %d %d",r,c));
+		System.out.println(String.format("First Move: %d %d",r,c));
 		game.reveal(r,c);
-		System.out.println("CHEAT:");
-		game.cheat();
 		System.out.println(game);
-		System.out.println("^\n^\n");
+
 		// Keep searching until win
-		int step = 0;
 		while(!game.win() && !game.lose())
 		{
-			if(step%20 == 0)
-			System.out.println(step);
-			step++;
-			if(step>300)
-			{
-				break;
-			}
-			String lastRound = game.toString();
-			this.search(game);
-			if(lastRound.equals(game.toString()))
+			String prevRound = game.toString();
+			this.search();
+			if(prevRound.equals(game.toString()))
 			{
 				System.out.println("No move can be taken without gussing.");
 				break;
 			}
+			System.out.println(game.toStringForDebugging());
+			System.out.println(game);
+
 		}
-		if(game.lose())
-		{
-			System.out.println("Sorry Master, I lost.");
-			return;
-		}
-		else if(game.win())
+		if(game.win())
 		{
 			System.out.println(game);
 			System.out.println("Master, I win!");
+			return true;
+		}
+		else if(game.lose())
+		{
+			System.out.println("Sorry Master, I lost.");
+			return false;
 		}
 		else
 		{
-			System.out.println("unfinished");
+			System.out.println(game);
+			System.out.println("ERROR!");
+			return false;
 		}
 	}
 
 	// Search through board to findMines and find safe tile
 	// uses findMines to find mines and use foundAllAdjacentMines
 	// to find safe tiles
-	protected void search(MineSweeper game)
+	protected void search()
 	{
 		for(int r = 0; r < game.height(); r++)
 		{
 			for(int c = 0; c < game.width(); c++)
 			{
-				ArrayList<Tile> mines = this.findMines(game,r,c);
-				if(mines != null)
+				if(foundAllAdjacentSafeTiles(r,c))
 				{
-					this.flagMines(mines);
-					game.numFlags += mines.size();
+					this.flagAdjacentMines(r,c);
 				}
-				//System.out.println(clueless);
-				if(!this.visited.contains(new Coord(r,c)))
+				if(this.foundAllAdjacentMines(r,c))
 				{
-					if(this.foundAllAdjacentMines(game,r,c))
-					{
-						this.revealAdjacentSafeTiles(game,r,c);
-						this.visited.add(new Coord(r,c));
-					}
+					this.revealAdjacentSafeTiles(r,c);
 				}
+				//System.out.println(game);
 			}
 		}
-		//System.out.println(clueless);
+		//System.out.println(game);
 	}
 
-	// Reveal all safe unflagged adjacent tiles
-	// Use foundAllAdjacentMines to check if tile is safe to use this method
-	protected void revealAdjacentSafeTiles(MineSweeper game, int r, int c)
-	{
-		try{										// Up left
-			if(!game.isFlagged(r-1,c-1))
-			{
-				game.reveal(r-1,c-1);
-			}
-		}catch(IndexOutOfBoundsException e){}
-		try{										// Up
-			if(!game.isFlagged(r-1,c))
-			{
-				game.reveal(r-1,c);
-			}
-		}catch(IndexOutOfBoundsException e){}
-		try{										// Up right
-			if(!game.isFlagged(r-1,c+1))
-			{
-				game.reveal(r-1,c+1);
-			}
-		}catch(IndexOutOfBoundsException e){}
-		try{										// Left
-			if(!game.isFlagged(r,c-1))
-			{
-				game.reveal(r,c-1);
-			}
-		}catch(IndexOutOfBoundsException e){}
-		try{										// Right
-			if(!game.isFlagged(r,c+1))
-			{
-				game.reveal(r,c+1);
-			}
-		}catch(IndexOutOfBoundsException e){}
-		try{										// Down left
-			if(!game.isFlagged(r+1,c-1))
-			{
-				game.reveal(r+1,c-1);
-			}
-		}catch(IndexOutOfBoundsException e){}
-		try{										// Down
-			if(!game.isFlagged(r+1,c))
-			{
-				game.reveal(r+1,c);
-			}
-		}catch(IndexOutOfBoundsException e){}
-		try{										// Down right
-			if(!game.isFlagged(r+1,c+1))
-			{
-				game.reveal(r+1,c+1);
-			}
-		}catch(IndexOutOfBoundsException e){}
-	}
 
 	// Check if a tile has adjacent mines all flagged
 	// Check if numSurroundingMines equals number of surrounding flagged tiles
 	// Return true if all neighbor mines have been found
 	// Ignore IndexOutOfBoundsException
-	protected boolean foundAllAdjacentMines(MineSweeper game, int r, int c)
+	protected boolean foundAllAdjacentMines(int r, int c)
 	{
 		int count = 0;
 		try{										// Up left
 			if(game.isFlagged(r-1,c-1))
 			{
 				count++;
-				if(count==game.board[r][c].numSurroundingMines){
+				if(count==game.numSurroundingMines(r,c)){
 					return true;
 				}
 			}
-		}catch(IndexOutOfBoundsException e){}
+		}
+		catch(IndexOutOfBoundsException e){}
 		try{										// Up
 			if(game.isFlagged(r-1,c))
 			{
 				count++;
-				if(count==game.board[r][c].numSurroundingMines){
+				if(count==game.numSurroundingMines(r,c)){
 					return true;
 				}
 			}
-		}catch(IndexOutOfBoundsException e){}
+		}
+		catch(IndexOutOfBoundsException e){}
 		try{										// Up right
 			if(game.isFlagged(r-1,c+1))
 			{
 				count++;
-				if(count==game.board[r][c].numSurroundingMines){
+				if(count==game.numSurroundingMines(r,c)){
 					return true;
 				}
 			}
-		}catch(IndexOutOfBoundsException e){}
+		}
+		catch(IndexOutOfBoundsException e){}
 		try{										// Left
 			if(game.isFlagged(r,c-1))
 			{
 				count++;
-				if(count==game.board[r][c].numSurroundingMines){
+				if(count==game.numSurroundingMines(r,c)){
 					return true;
 				}
 			}
-		}catch(IndexOutOfBoundsException e){}
+		}
+		catch(IndexOutOfBoundsException e){}
 		try{										// Right
 			if(game.isFlagged(r,c+1))
 			{
 				count++;
-				if(count==game.board[r][c].numSurroundingMines){
+				if(count==game.numSurroundingMines(r,c)){
 					return true;
 				}
 			}
-		}catch(IndexOutOfBoundsException e){}
+		}
+		catch(IndexOutOfBoundsException e){}
 		try{										// Down left
 			if(game.isFlagged(r+1,c-1))
 			{
 				count++;
-				if(count==game.board[r][c].numSurroundingMines){
+				if(count==game.numSurroundingMines(r,c)){
 					return true;
 				}
 			}
-		}catch(IndexOutOfBoundsException e){}
+		}
+		catch(IndexOutOfBoundsException e){}
 		try{										// Down
 			if(game.isFlagged(r+1,c))
 			{
 				count++;
-				if(count==game.board[r][c].numSurroundingMines){
+				if(count==game.numSurroundingMines(r,c)){
 					return true;
 				}
 			}
-		}catch(IndexOutOfBoundsException e){}
+		}
+		catch(IndexOutOfBoundsException e){}
 		try{										// Down right
 			if(game.isFlagged(r+1,c+1))
 			{
 				count++;
-				if(count==game.board[r][c].numSurroundingMines){
+				if(count==game.numSurroundingMines(r,c)){
 					return true;
 				}
 			}
-		}catch(IndexOutOfBoundsException e){}
+		}
+		catch(IndexOutOfBoundsException e){}
 		return false;
+	}
+
+	// Reveal all safe unflagged adjacent tiles
+	// Use foundAllAdjacentMines to check if tile is safe to use this method
+	protected void revealAdjacentSafeTiles(int r, int c)
+	{
+		try{										// Up left
+			if(!game.isFlagged(r-1,c-1))
+			{
+				game.reveal(r-1,c-1);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try{										// Up
+			if(!game.isFlagged(r-1,c))
+			{
+				game.reveal(r-1,c);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try{										// Up right
+			if(!game.isFlagged(r-1,c+1))
+			{
+				game.reveal(r-1,c+1);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try{										// Left
+			if(!game.isFlagged(r,c-1))
+			{
+				game.reveal(r,c-1);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try{										// Right
+			if(!game.isFlagged(r,c+1))
+			{
+				game.reveal(r,c+1);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try{										// Down left
+			if(!game.isFlagged(r+1,c-1))
+			{
+				game.reveal(r+1,c-1);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try{										// Down
+			if(!game.isFlagged(r+1,c))
+			{
+				game.reveal(r+1,c);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try{										// Down right
+			if(!game.isFlagged(r+1,c+1))
+			{
+				game.reveal(r+1,c+1);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
 	}
 
 	// Check if number of surrouding hidden tiles equals numSurroundingMines
 	// If condition is met, that means all hidden tiles are mines,
 	// Return those hidden tiles as a list
 	// Ignore IndexOutOfBoundsException
-	protected ArrayList<Tile> findMines(MineSweeper game, int r, int c)
+	protected boolean foundAllAdjacentSafeTiles(int r, int c)
 	{
-		ArrayList<Tile> mines = new ArrayList<Tile>();
 		int count = 0;
 		try{                          							// Up left
-			if(game.board[r-1][c-1].visible == false)
+			if(game.isVisible(r-1,c-1))
 			{
 				count++;
-				mines.add(game.board[r-1][c-1]);
-				if(count > game.board[r][c].numSurroundingMines)
-				{return null;}
+				if(count == 8-game.numSurroundingMines(r,c))
+				{
+					return true;
+				}
 			}
-		}catch( IndexOutOfBoundsException e){};
-		try{                          							// Up
-			if(game.board[r-1][c].visible == false)
-			{
-				count++;
-				mines.add(game.board[r-1][c]);
-				if(count > game.board[r][c].numSurroundingMines)
-				{return null;}
-			}
-		}catch( IndexOutOfBoundsException e){};
-		try{                          							// Up right
-			if(game.board[r-1][c+1].visible == false)
-			{
-				count++;
-				mines.add(game.board[r-1][c+1]);
-				if(count > game.board[r][c].numSurroundingMines)
-				{return null;}
-			}
-		}catch( IndexOutOfBoundsException e){};
-		try{                          							// Left
-			if(game.board[r][c-1].visible == false)
-			{
-				count++;
-				mines.add(game.board[r][c-1]);
-				if(count > game.board[r][c].numSurroundingMines)
-				{return null;}
-			}
-		}catch( IndexOutOfBoundsException e){};
-		try{                          							// Right
-			if(game.board[r][c+1].visible == false)
-			{
-				count++;
-				mines.add(game.board[r][c+1]);
-				if(count > game.board[r][c].numSurroundingMines)
-				{return null;}
-			}
-		}catch( IndexOutOfBoundsException e){};
-		try{                          							// Down left
-			if(game.board[r+1][c-1].visible == false)
-			{
-				count++;
-				mines.add(game.board[r+1][c-1]);
-				if(count > game.board[r][c].numSurroundingMines)
-				{return null;}
-			}
-		}catch( IndexOutOfBoundsException e){};
-		try{                          							// Down
-			if(game.board[r+1][c].visible == false)
-			{
-				count++;
-				mines.add(game.board[r+1][c]);
-				if(count > game.board[r][c].numSurroundingMines)
-				{return null;}
-			}
-		}catch( IndexOutOfBoundsException e){};
-		try{                          							// Down right
-			if(game.board[r+1][c+1].visible == false)
-			{
-				count++;
-				mines.add(game.board[r+1][c+1]);
-				if(count > game.board[r][c].numSurroundingMines)
-				{return null;}
-			}
-		}catch( IndexOutOfBoundsException e){};
-		return mines;
-	}
-
-	// Flag all tile as mine in given list of tiles
-	protected void flagMines(ArrayList<Tile> mines)
-	{
-		for(Tile mine: mines)
-		{
-			mine.flag = true;
 		}
+		catch(IndexOutOfBoundsException e){};
+		try{                          							// Up
+			if(game.isVisible(r-1,c))
+			{
+				count++;
+				if(count == 8-game.numSurroundingMines(r,c))
+				{
+					return true;
+				}
+			}
+		}
+		catch(IndexOutOfBoundsException e){};
+		try{                          							// Up right
+			if(game.isVisible(r-1,c+1))
+			{
+				count++;
+				if(count == 8-game.numSurroundingMines(r,c))
+				{
+					return true;
+				}
+			}
+		}
+		catch(IndexOutOfBoundsException e){};
+		try{                          							// Left
+			if(game.isVisible(r,c-1))
+			{
+				count++;
+				if(count == 8-game.numSurroundingMines(r,c))
+				{
+					return true;
+				}
+			}
+		}
+		catch(IndexOutOfBoundsException e){};
+		try{                          							// Right
+			if(game.isVisible(r,c+1))
+			{
+				count++;
+				if(count == 8-game.numSurroundingMines(r,c))
+				{
+					return true;
+				}
+			}
+		}
+		catch(IndexOutOfBoundsException e){};
+		try{                          							// Down left
+			if(game.isVisible(r+1,c-1))
+			{
+				count++;
+				if(count == 8-game.numSurroundingMines(r,c))
+				{
+					return true;
+				}
+			}
+		}
+		catch(IndexOutOfBoundsException e){};
+		try{                          							// Down
+			if(game.isVisible(r+1,c))
+			{
+				count++;
+				if(count == 8-game.numSurroundingMines(r,c))
+				{
+					return true;
+				}
+			}
+		}
+		catch(IndexOutOfBoundsException e){};
+		try{                          							// Down right
+			if(game.isVisible(r+1,c+1))
+			{
+				count++;
+				if(count == 8-game.numSurroundingMines(r,c))
+				{
+					return true;
+				}
+			}
+		}
+		catch(IndexOutOfBoundsException e){};
+		return false;
 	}
 
+	// Flag all nonvisible as mines, use this after checking if a tile has
+	// foundAllAdjacentMines
+	protected void flagAdjacentMines(int r, int c)
+	{
+		try                                              // Up left
+		{
+			if(game.isVisible(r-1, c-1) == false)
+			{
+				game.flag(r-1, c-1);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try                                              // Up
+		{
+			if(game.isVisible(r-1, c) == false)
+			{
+				game.flag(r-1, c);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+			try                                          // Up right
+			{
+				if(game.isVisible(r-1, c+1) == false)
+				{
+					game.flag(r-1, c+1);
+				}
+			}
+		catch(IndexOutOfBoundsException e){}
+			try                                          // Left
+			{
+				if(game.isVisible(r, c-1) == false)
+				{
+					game.flag(r, c-1);
+				}
+			}
+		catch(IndexOutOfBoundsException e){}
+		try                                              // Right
+		{
+			if(game.isVisible(r, c+1) == false)
+			{
+				game.flag(r, c+1);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try                                              // Down left
+		{
+			if(game.isVisible(r+1, c-1) == false)
+			{
+				game.flag(r+1, c-1);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try                                              // Down
+		{
+			if(game.isVisible(r+1, c) == false)
+			{
+				game.flag(r+1, c);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		try                                              // Down right
+		{
+			if(game.isVisible(r+1, c+1) == false)
+			{
+				game.flag(r+1, c+1);
+			}
+		}
+		catch(IndexOutOfBoundsException e){}
+		}
 }
