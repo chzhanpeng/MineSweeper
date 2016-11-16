@@ -22,8 +22,7 @@ public class Solver
 	// and use findAdjacentSafeMines to find safe tiles until victory
 	public boolean solve()
 	{
-		System.out.println(game.toStringForDebugging());
-
+		//System.out.println(game.toStringForDebugging());
 		//System.out.println(game);
 		this.randomFirstPick();
 		// Keep searching until win
@@ -43,8 +42,8 @@ public class Solver
 				System.out.println("No move can be taken without gussing.");
 				break;
 			}
-			System.out.println(game.toStringForDebugging());
-			System.out.println(game);
+			//System.out.println(game.toStringForDebugging());
+			//System.out.println(game);
 		}
 	}
 
@@ -69,9 +68,10 @@ public class Solver
 	// Check result after game also print result
 	protected boolean checkResult()
 	{
+		System.out.println(game);
+		System.out.println(game.toStringForDebugging());
 		if(game.win())
 		{
-			//System.out.println(game);
 			System.out.println("Master, I win!");
 			return true;
 		}
@@ -82,7 +82,6 @@ public class Solver
 		}
 		else
 		{
-			//System.out.println(game);
 			System.out.println("ERROR!");
 			return false;
 		}
@@ -370,7 +369,10 @@ public class Solver
 		{
 			if(game.isVisible(r-1, c-1) == false)
 			{
-				game.flag(r-1, c-1);
+				if(!game.isFlagged(r-1,c-1))
+				{
+					game.flag(r-1, c-1);
+				}
 			}
 		}
 		catch(IndexOutOfBoundsException e){}
@@ -378,31 +380,43 @@ public class Solver
 		{
 			if(game.isVisible(r-1, c) == false)
 			{
-				game.flag(r-1, c);
+				if(!game.isFlagged(r-1, c))
+				{
+					game.flag(r-1, c);
+				}
 			}
 		}
 		catch(IndexOutOfBoundsException e){}
-			try                                          // Up right
+		try                                          // Up right
+		{
+			if(game.isVisible(r-1, c+1) == false)
 			{
-				if(game.isVisible(r-1, c+1) == false)
+				if(!game.isFlagged(r-1, c+1))
 				{
 					game.flag(r-1, c+1);
 				}
 			}
+		}
 		catch(IndexOutOfBoundsException e){}
-			try                                          // Left
+		try                                          // Left
+		{
+			if(game.isVisible(r, c-1) == false)
 			{
-				if(game.isVisible(r, c-1) == false)
+				if(!game.isFlagged(r, c-1))
 				{
 					game.flag(r, c-1);
 				}
 			}
+		}
 		catch(IndexOutOfBoundsException e){}
 		try                                              // Right
 		{
 			if(game.isVisible(r, c+1) == false)
 			{
-				game.flag(r, c+1);
+				if(!game.isFlagged(r, c+1))
+				{
+					game.flag(r, c+1);
+				}
 			}
 		}
 		catch(IndexOutOfBoundsException e){}
@@ -410,7 +424,10 @@ public class Solver
 		{
 			if(game.isVisible(r+1, c-1) == false)
 			{
-				game.flag(r+1, c-1);
+				if(!game.isFlagged(r+1, c-1))
+				{
+					game.flag(r+1, c-1);
+				}
 			}
 		}
 		catch(IndexOutOfBoundsException e){}
@@ -418,7 +435,10 @@ public class Solver
 		{
 			if(game.isVisible(r+1, c) == false)
 			{
-				game.flag(r+1, c);
+				if(!game.isFlagged(r+1, c))
+				{
+					game.flag(r+1, c);
+				}
 			}
 		}
 		catch(IndexOutOfBoundsException e){}
@@ -426,9 +446,12 @@ public class Solver
 		{
 			if(game.isVisible(r+1, c+1) == false)
 			{
-				game.flag(r+1, c+1);
+				if(!game.isFlagged(r+1, c+1))
+				{
+					game.flag(r+1, c+1);
+				}
 			}
 		}
 		catch(IndexOutOfBoundsException e){}
-		}
+	}
 }

@@ -14,13 +14,13 @@ public class Interactive
 		int gameWidth = sc.nextInt();
 		int gameHeight = sc.nextInt();
 		//Force the player to choose an integer between 8 and 15
-                while ((gameWidth < 8 || gameWidth > 20) || (gameHeight < 8 || gameHeight > 20) )
-                {
-                    System.out.println("ERROR! Invalid size");
-                    System.out.print("Enter game size (n m): ");
-                    gameWidth = sc.nextInt();
-                    gameHeight = sc.nextInt();
-                }
+		while ((gameWidth < 8 || gameWidth > 20) || (gameHeight < 8 || gameHeight > 20) )
+		{
+			System.out.println("ERROR! Invalid size");
+			System.out.print("Enter game size (n m): ");
+			gameWidth = sc.nextInt();
+			gameHeight = sc.nextInt();
+		}
 		// Ask player for game difficulty
 		System.out.print("Enter game difficulty (easy/medium/hard): ");
 		String gameDifficulty = sc.next().toLowerCase();

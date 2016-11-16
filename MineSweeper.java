@@ -139,6 +139,24 @@ public class MineSweeper {
         }
     }
 
+    // Generate game after first move
+    public void generate(int r, int c)
+    {
+        this.fresh = false;
+        this.fmRow = r;
+        this.fmCol = c;
+        Generator gnrt = new Generator();
+        gnrt.randomGenerate(this, this.numMines);
+        //gnrt.smartGenerate(this, this.numMines);
+        this.numVisible++;
+        this.board[r][c].visible = true;
+        // reveal adjacent tiles when it's blank tile
+        if(this.board[r][c].numSurroundingMines == 0)
+        {
+            this.revealNeighbor(r,c);
+        }
+    }
+
     // Reveal a tile that player choose, check if the move is first move,
     // generate game after first move; check if the tile is a mine, game is
     // over if so, reveal its neighbors if a tile is blank tile
@@ -146,19 +164,7 @@ public class MineSweeper {
     {
         if(this.fresh)
         {
-            this.fresh = false;
-            this.fmRow = r;
-            this.fmCol = c;
-            Generator gnrt = new Generator();
-            gnrt.randomGenerate(this, this.numMines);
-            //gnrt.smartGenerate(this, this.numMines);
-            this.numVisible++;
-            this.board[r][c].visible = true;
-            // reveal adjacent tiles when it's blank tile
-            if(this.board[r][c].numSurroundingMines == 0)
-            {
-                this.revealNeighbor(r,c);
-            }
+            this.generate(r, c);
         }
         else
         {
@@ -370,6 +376,5 @@ public class MineSweeper {
 
     public static void main(String[] args)
     {
-
     }
 }
