@@ -55,7 +55,9 @@ public class MineSweeper {
     {
         return
         this.numFlags == this.numMines ||
-        this.height()*this.width() - this.numVisible == this.numMines;
+        this.height()*this.width() - this.numVisible == this.numMines ||
+        this.numFlags + this.numVisible == this.height()*this.width();
+
     }
 
     // Check if all mines are flagged
@@ -146,7 +148,7 @@ public class MineSweeper {
         this.fmRow = r;
         this.fmCol = c;
         Generator gnrt = new Generator();
-        gnrt.randomGenerate(this, this.numMines);
+        gnrt.smartGenerate(this, this.numMines);
         //gnrt.smartGenerate(this, this.numMines);
         this.numVisible++;
         this.board[r][c].visible = true;
@@ -239,6 +241,31 @@ public class MineSweeper {
             }
         }
         System.out.println(this);
+    }
+
+    // Cover all tiles
+    protected void coverAll()
+    {
+        for(int r = 0; r < this.height(); r++)
+        {
+            for(int c = 0; c < this.width(); c++)
+            {
+                this.board[r][c].visible = false;
+            }
+        }
+        this.numVisible = 0;
+    }
+
+    protected void unflagAll()
+    {
+        for(int r = 0; r < this.height(); r++)
+        {
+            for(int c = 0; c < this.width(); c++)
+            {
+                this.board[r][c].flag = false;
+            }
+        }
+        this.numFlags = 0;
     }
 
     // A cheat for testing purpose ONLY, draw board with all mines marked

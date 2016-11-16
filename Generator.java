@@ -38,10 +38,12 @@ public class Generator{
     protected void smartGenerate(MineSweeper game, int numMines)
     {
         Random rd = new Random();
-        Solver solver = new Solver(game);
+        Solver solver = new Solver(game, false);
+        //System.out.println("Before: "+ game);
         int curNumMines = 0;
         while(curNumMines < numMines)
         {
+
             // Randomly select position to place mine
             // Reselect for invalid position
             int r, c;
@@ -56,6 +58,7 @@ public class Generator{
             if(game.board[r][c].mine == false)
             {
                 game.board[r][c].mine = true;
+                game.coverAll();
                 this.resetNumSurroundingMines(game);
                 this.countAdjacentMines(game);
                 if(!solver.solve())
@@ -64,9 +67,17 @@ public class Generator{
                     //game.fresh = true;
                     continue;
                 }
+                game.coverAll();
                 curNumMines++;
             }
         }
+        //System.out.println("Final\n"+ game);
+        game.unflagAll();
+
+        //game.cheat();
+        //System.out.println("Final\n"+ game);
+
+        //System.out.println(game.toStringForDebugging());
     }
 
     // Reset number of surrounding mines for the board

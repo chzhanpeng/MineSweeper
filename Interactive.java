@@ -26,11 +26,11 @@ public class Interactive
 		String gameDifficulty = sc.next().toLowerCase();
 		// Force the player to choose a valid difficulty String
 		while (!gameDifficulty.equals("easy") && !gameDifficulty.equals("medium") && !gameDifficulty.equals("hard")  )
-                {
-                    System.out.println("ERROR! Invalid difficulty");
-                    System.out.print("Enter game difficulty (easy/medium/hard): ");
-                    gameDifficulty = sc.next().toLowerCase();
-                }
+		{
+			System.out.println("ERROR! Invalid difficulty");
+			System.out.print("Enter game difficulty (easy/medium/hard): ");
+			gameDifficulty = sc.next().toLowerCase();
+		}
 		// Create new game
 		MineSweeper game = new MineSweeper(gameWidth, gameHeight, gameDifficulty);
 		System.out.println(game);
@@ -44,7 +44,7 @@ public class Interactive
 		Scanner sc = new Scanner(System.in); // Read inputs
 		System.out.print("Next move (flag/unflag/reveal r c): ");
 		game.reveal(sc.nextInt(), sc.nextInt());
-		System.out.println(game.numVisible);
+		//System.out.println(game.numVisible);
 
 		while(!game.lose() && !game.win())
 		{
