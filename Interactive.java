@@ -44,6 +44,8 @@ public class Interactive
 		Scanner sc = new Scanner(System.in); // Read inputs
 		System.out.print("Next move (flag/unflag/reveal r c): ");
 		game.reveal(sc.nextInt(), sc.nextInt());
+		System.out.println(game);
+
 		//System.out.println(game.numVisible);
 
 		while(!game.lose() && !game.win())
