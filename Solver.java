@@ -105,14 +105,19 @@ public class Solver
         {
             for(int c = 0; c < game.width(); c++)
             {
-                if(foundAllAdjacentSafeTiles(r,c))
-                {
-                    this.flagAdjacentMines(r,c);
-                }
-                if(this.foundAllAdjacentMines(r,c))
-                {
-                    this.revealAdjacentSafeTiles(r,c);
-                }
+                //if(this.game.needCheck(r,c))
+                //{
+                    if(foundAllAdjacentSafeTiles(r,c))
+                    {
+                        ///this.game.skip(r,c);
+                        this.flagAdjacentMines(r,c);
+                    }
+                    if(this.foundAllAdjacentMines(r,c))
+                    {
+                        //this.game.skip(r,c);
+                        this.revealAdjacentSafeTiles(r,c);
+                    }
+                //}
                 //System.out.println(game);
             }
         }

@@ -1,3 +1,5 @@
+import java.lang.StringBuilder;
+
 public class MineSweeper {
 
     // Game board consists a matrix of tile object as mines,
@@ -58,6 +60,19 @@ public class MineSweeper {
         this.height()*this.width() - this.numVisible == this.numMines ||
         this.numFlags + this.numVisible == this.height()*this.width();
 
+    }
+
+    // Whether check is needed for this tile
+    protected boolean needCheck(int row, int col)
+    {
+        return this.board[row][col].check;
+    }
+
+    // Set check to false, which mean solver can skip this tile while searching
+    // for move
+    protected void skip(int row, int col)
+    {
+        this.board[row][col].check = false;
     }
 
     // Check if all mines are flagged
@@ -184,6 +199,7 @@ public class MineSweeper {
                     // reveal adjacent tiles when it's blank tile
                     if(this.board[r][c].numSurroundingMines == 0)
                     {
+                        this.skip(r,c);
                         this.revealNeighbor(r,c);
                     }
                 }
@@ -312,6 +328,7 @@ public class MineSweeper {
     // '?' for a unrevealed tile
     // '*' for a revealed tile with mine
     // ' ' for a revealed empty tile
+    // '!' for tile with flag
     // '1-8' represen number of mines in surrounding tiles
     //    0 1 2 3
     //-------------
@@ -322,64 +339,61 @@ public class MineSweeper {
     //-------------
     public String toString()
     {
-        String repr = "   ";
+        StringBuilder repr = new StringBuilder("   ");
         for(int i = 0; i < this.width(); i++)
         {
-            repr += String.format("%2d",i);
+            repr.append(String.format("%2d",i));
         }
-        repr += "\n";
-        repr += new String(new char[this.width()*2 +5]).replace("\0","-");
-        repr += "\n";
+        repr.append("\n");
+        repr.append(new String(new char[this.width()*2 +5]).replace("\0","-"));
+        repr.append("\n");
         for(int r = 0; r < this.board.length; r++)
         {
-            repr += String.format("%2d| ",r);
+            repr.append(String.format("%2d| ",r));
             for(int c = 0; c < this.width(); c++)
             {
                 if(this.board[r][c].flag == true)
                 {
-                    repr += "! ";
+                    repr.append("! ");
                 }
                 else
                 {
                     if(this.board[r][c].visible == false)
                     {
-                        repr += "? ";
+                        repr.append("? ");
                     }
                     else
                     {
                         if(this.board[r][c].mine == true)
                         {
-                            repr += "* ";
+                            repr.append("* ");
                         }
                         else
                         {
                             if(this.board[r][c].numSurroundingMines == 0)
                             {
-                                repr += "  ";
+                                repr.append("  ");
                             }
                             else
                             {
-                                repr += this.board[r][c].numSurroundingMines;
-                                repr += " ";
+                                repr.append(this.board[r][c].numSurroundingMines);
+                                repr.append(" ");
                             }
                         }
                     }
                 }
             }
-            repr += "|\n";
+            repr.append("\n");
         }
-        repr += new String(new char[this.width()*2 +5]).replace("\0","-");
-        return repr;
+        repr.append(new String(new char[this.width()*2 +5]).replace("\0","-"));
+        return repr.toString();
     }
 
     // String representation for debugging
     // Show game information such as number of mine, game difficulty
     public String toStringForDebugging()
     {
-        String repr = String.format("Number of Mines: %s\n", this.numMines);
-        repr += String.format("Number of Flags: %s\n", this.numFlags);
-        repr += String.format("Number of Visible: %s\n", this.numVisible);
-        return repr;
+        return String.format("Number of Mines: %s\nNumber of Flags: %s\nNumber of Visible: %s\n", this.numMines, this.numFlags, this.numVisible);
     }
 
     // Preset a board with mines at desired location
@@ -401,7 +415,4 @@ public class MineSweeper {
         return game;
     }
 
-    public static void main(String[] args)
-    {
-    }
 }

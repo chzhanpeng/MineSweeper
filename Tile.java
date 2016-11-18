@@ -11,6 +11,8 @@ public class Tile
 	protected boolean flag;
 	// Coordinate
 	protected int row, col;
+	// Whether check is need for this tile, false means solver can skip this tile
+	protected boolean check;
 
 	// Tile class constructor, initialize mine field,
 	// New tiles are always hidden with no flag
@@ -19,6 +21,7 @@ public class Tile
 		this.row = row;
 		this.col = col;
 		this.mine = mine;
+		this.check = true;
 		this.flag = false;
 		this.visible = false;
 		this.numSurroundingMines = 0;
