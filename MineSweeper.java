@@ -199,7 +199,7 @@ public class MineSweeper {
                     // reveal adjacent tiles when it's blank tile
                     if(this.board[r][c].numSurroundingMines == 0)
                     {
-                        this.skip(r,c);
+                        //this.skip(r,c);
                         this.revealNeighbor(r,c);
                     }
                 }
@@ -272,7 +272,8 @@ public class MineSweeper {
         this.numVisible = 0;
     }
 
-    protected void unflagAll()
+    // Unflag all tiles
+    protected void clearAllFlags()
     {
         for(int r = 0; r < this.height(); r++)
         {
@@ -285,43 +286,45 @@ public class MineSweeper {
     }
 
     // A cheat for testing purpose ONLY, draw board with all mines marked
+    //    0 1 2 3
+    //-------------
+    // 0|   1 1 1 |
+    // 1| 1 2 * 1 |
+    // 2| 1 * 2 1 |
+    // 3| 1 1 1   |
+    //-------------
     protected void cheat()
     {
-        String repr = "   ";
+        StringBuilder repr = new StringBuilder("   ");
         for(int i = 0; i < this.width(); i++)
         {
-            repr += String.format("%2d",i);
+            repr.append(String.format("%2d",i));
         }
-        repr += "\n";
-        repr += new String(new char[this.width()*2 +5]).replace("\0","-");
-        repr += "\n";
-        for(int r = 0; r < this.board.length; r++)
+        repr.append("\n");
+        repr.append(new String(new char[this.width()*2 +5]).replace("\0","-"));
+        repr.append("\n");
+        for(int r = 0; r < this.height(); r++)
         {
-            repr += String.format("%2d| ",r);
+            repr.append(String.format("%2d| ",r));
             for(int c = 0; c < this.width(); c++)
             {
                 if(this.board[r][c].mine == true)
                 {
-                    repr += "* ";
+                    repr.append("* ");
+                }
+                else if(this.board[r][c].numSurroundingMines == 0)
+                {
+                    repr.append("  ");
                 }
                 else
                 {
-                    if(this.board[r][c].numSurroundingMines == 0)
-                    {
-                        repr += "  ";
-                    }
-                    else
-                    {
-                        repr += this.board[r][c].numSurroundingMines + " ";
-                    }
+                    repr.append(this.board[r][c].numSurroundingMines + " ");
                 }
-
-
             }
-            repr += "|\n";
+            repr.append("|\n");
         }
-        repr += new String(new char[this.width()*2 +5]).replace("\0","-");
-        System.out.println(repr);
+        repr.append(new String(new char[this.width()*2 +5]).replace("\0","-"));
+        System.out.println(repr.toString());
     }
 
     // String representation of game board for player
@@ -347,7 +350,7 @@ public class MineSweeper {
         repr.append("\n");
         repr.append(new String(new char[this.width()*2 +5]).replace("\0","-"));
         repr.append("\n");
-        for(int r = 0; r < this.board.length; r++)
+        for(int r = 0; r < this.height(); r++)
         {
             repr.append(String.format("%2d| ",r));
             for(int c = 0; c < this.width(); c++)
@@ -356,60 +359,54 @@ public class MineSweeper {
                 {
                     repr.append("! ");
                 }
+                else if(this.board[r][c].visible == false)
+                {
+                    repr.append("? ");
+                }
+                else if(this.board[r][c].mine == true)
+                {
+                    repr.append("* ");
+                }
+                else if(this.board[r][c].numSurroundingMines == 0)
+                {
+                    repr.append("  ");
+                }
                 else
                 {
-                    if(this.board[r][c].visible == false)
-                    {
-                        repr.append("? ");
-                    }
-                    else
-                    {
-                        if(this.board[r][c].mine == true)
-                        {
-                            repr.append("* ");
-                        }
-                        else
-                        {
-                            if(this.board[r][c].numSurroundingMines == 0)
-                            {
-                                repr.append("  ");
-                            }
-                            else
-                            {
-                                repr.append(this.board[r][c].numSurroundingMines);
-                                repr.append(" ");
-                            }
-                        }
-                    }
+                    repr.append(this.board[r][c].numSurroundingMines + " ");
                 }
             }
-            repr.append("\n");
+            repr.append("|\n");
         }
         repr.append(new String(new char[this.width()*2 +5]).replace("\0","-"));
         return repr.toString();
     }
 
-    // String representation for debugging
-    // Show game information such as number of mine, game difficulty
-    public String toStringForDebugging()
+    // Show game information such as number of mine, game difficulty etc.
+    public String gameInfo()
     {
-        return String.format("Number of Mines: %s\nNumber of Flags: %s\nNumber of Visible: %s\n", this.numMines, this.numFlags, this.numVisible);
+        return String.format("Number of Mines: %s\n",this.numMines) +
+        String.format("Number of Flags: %s\n", this.numFlags) +
+        String.format("Number of Visible: %s\n", this.numVisible);
     }
 
-    // Preset a board with mines at desired location
-    protected static MineSweeper presetGame()
+    // Return a preset game, modify as needed
+    private static MineSweeper presetGame()
     {
         Generator gnrt = new Generator();
         MineSweeper game = new MineSweeper(6,6,"easy");
-        for(int r=0; r<6; r++)
+        for(int r = 0; r < game.height(); r++)
         {
-            for(int c=0; c<6; c++)
+            for(int c = 0; c < game.width(); c++)
             {
                 game.board[r][c].mine = false;
                 game.board[r][c].visible = false;
                 game.board[r][c].numSurroundingMines = 0;
             }
         }
+        // Modify this part to preset game
+        game.board[1][1].mine = true;
+        game.board[1][1].mine = true;
         game.board[1][1].mine = true;
         gnrt.countAdjacentMines(game);
         return game;

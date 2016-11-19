@@ -109,12 +109,12 @@ public class Solver
                 //{
                     if(foundAllAdjacentSafeTiles(r,c))
                     {
-                        ///this.game.skip(r,c);
+                        this.game.skip(r,c);
                         this.flagAdjacentMines(r,c);
                     }
                     if(this.foundAllAdjacentMines(r,c))
                     {
-                        //this.game.skip(r,c);
+                        this.game.skip(r,c);
                         this.revealAdjacentSafeTiles(r,c);
                     }
                 //}

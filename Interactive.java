@@ -34,6 +34,7 @@ public class Interactive
 		// Create new game
 		MineSweeper game = new MineSweeper(gameWidth, gameHeight, gameDifficulty);
 		System.out.println(game);
+		//game.cheat();
 		Interactive.interact(game);
 	}
 
